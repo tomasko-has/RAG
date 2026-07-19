@@ -7,22 +7,46 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>RAG Chatbot</h1>
-      <p class="subtitle">Ask questions about the uploaded documents</p>
-      <div class="upload-area">
-        <label class="upload-btn" for="file-input">Upload Document (.txt, .pdf)</label>
-        <input type="file" id="file-input" accept=".txt,.pdf" hidden>
-        <span class="upload-status" id="upload-status"></span>
-      </div>
-    </header>
 
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <h1>RAG Chatbot</h1>
+      <p class="sidebar-desc">Upload a document and ask questions about its content.</p>
+    </div>
+
+    <div class="upload-section">
+      <p class="section-label">Document</p>
+      <label class="upload-btn" for="file-input">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Upload (.txt, .pdf)
+      </label>
+      <input type="file" id="file-input" accept=".txt,.pdf" hidden>
+      <div class="upload-status" id="upload-status">sample.txt loaded</div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <p class="sidebar-hint">Powered by Claude &amp; RAG</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="mobile-header">
+      <h1>RAG Chatbot</h1>
+      <label class="mobile-upload-btn" for="file-input">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </label>
+    </div>
     <div class="chat" id="chat">
       <div class="message assistant">
-        <div class="message-content">
-          Hello! I can answer questions based on the loaded documents. Try asking about the menu, prices, opening hours, or delivery options.
-        </div>
+        <div class="avatar"></div><div class="message-content">Hello! I can answer questions based on the loaded documents. Try asking about the menu, prices, opening hours, or delivery options.</div>
       </div>
     </div>
 
@@ -30,12 +54,17 @@
       <input
         type="text"
         id="input"
-        placeholder="Ask a question..."
+        placeholder="Ask a question about the document..."
         autocomplete="off"
       >
-      <button type="submit" id="send-btn">Send</button>
+      <button type="submit" id="send-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
     </form>
-  </div>
+  </main>
 
   <script src="app.js"></script>
 </body>
