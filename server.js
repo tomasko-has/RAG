@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { readFileSync } from 'fs';
 import multer from 'multer';
+import pdfParse from 'pdf-parse-new';
 import { chunkText } from './chunker.js';
 import { addChunks, clearStore } from './vectorStore.js';
 import { askStream } from './rag.js';
@@ -54,8 +55,18 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   }
 
   try {
-    // Prečítame obsah súboru ako text (odstránime BOM ak existuje)
-    const fileText = req.file.buffer.toString('utf-8').replace(/^\uFEFF/, '');
+    // Podľa typu súboru extrahujeme text
+    let fileText;
+    const filename = req.file.originalname.toLowerCase();
+
+    if (filename.endsWith('.pdf')) {
+      // PDF — pdf-parse extrahuje text z PDF bufferu
+      const pdfData = await pdfParse(req.file.buffer);
+      fileText = pdfData.text;
+    } else {
+      // Textový súbor — priamo prečítame (odstránime BOM ak existuje)
+      fileText = req.file.buffer.toString('utf-8').replace(/^\uFEFF/, '');
+    }
 
     if (!fileText.trim()) {
       return res.status(400).json({ error: 'File is empty' });
@@ -77,8 +88,8 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       chunks: newChunks.length
     });
   } catch (error) {
-    console.error('Upload error:', error.message);
-    res.status(500).json({ error: 'Failed to process file' });
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message || 'Failed to process file' });
   }
 });
 

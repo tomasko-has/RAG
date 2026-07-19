@@ -14,7 +14,8 @@ Rules:
 - If the answer is not in the context, say "I don't have that information in the provided documents."
 - Do NOT make up information or use knowledge from your training.
 - Be concise and helpful.
-- If the context contains relevant information, quote specific details (prices, times, etc.).`;
+- If the context contains relevant information, quote specific details (prices, times, etc.).
+- Do NOT use Markdown formatting. No hashtags, no asterisks, no bullet points with dashes. Use plain text only.`;
 
 /**
  * Spracuje otázku cez RAG pipeline (bez streamingu — pre testovanie)
