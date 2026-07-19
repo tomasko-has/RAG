@@ -2,6 +2,41 @@ const chat = document.getElementById('chat');
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('send-btn');
+const fileInput = document.getElementById('file-input');
+const uploadStatus = document.getElementById('upload-status');
+
+// File upload handler
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  uploadStatus.textContent = 'Processing...';
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      uploadStatus.textContent = `"${data.filename}" loaded (${data.chunks} chunks)`;
+      addMessage(`Document "${data.filename}" uploaded and processed. You can now ask questions about it.`, 'assistant');
+    } else {
+      uploadStatus.textContent = data.error || 'Upload failed';
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    uploadStatus.textContent = 'Upload failed: ' + error.message;
+  }
+
+  // Reset input aby sa dal nahrať ten istý súbor znova
+  fileInput.value = '';
+});
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();

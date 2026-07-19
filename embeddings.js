@@ -13,9 +13,7 @@ let embedder = null;
  */
 async function getEmbedder() {
   if (!embedder) {
-    console.log('Loading embedding model (first time may take a moment)...');
     embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    console.log('Embedding model loaded.');
   }
   return embedder;
 }

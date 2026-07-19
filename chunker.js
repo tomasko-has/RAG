@@ -1,6 +1,7 @@
 // chunker.js — Rozseká dokument na menšie kúsky pre RAG pipeline
-// Stratégia: delíme podľa odstavcov (prázdny riadok = hranica)
-// Ak je odstavec príliš dlhý, rozdelíme ho ďalej podľa viet
+// Stratégia: najprv skúsi deliť podľa prázdnych riadkov (odstavcov)
+// Ak to nevyjde, delí podľa jednotlivých riadkov
+// Ak je text bez riadkov, delí podľa viet
 
 /**
  * Rozseká text na kúsky (chunks) vhodné pre embedding
@@ -13,27 +14,45 @@
 export function chunkText(text, options = {}) {
   const { maxChunkSize = 500, overlap = 50 } = options;
 
-  // Rozdelíme podľa prázdnych riadkov (odstavcov)
-  const paragraphs = text
+  // Vyčistíme text
+  const cleanText = text.trim();
+  if (!cleanText) return [];
+
+  // Skúsime rozdeliť podľa prázdnych riadkov (odstavcov)
+  let parts = cleanText
     .split(/\n\s*\n/)
     .map(p => p.trim())
     .filter(p => p.length > 0);
 
+  // Ak máme len 1 veľký blok, skúsime deliť podľa jednotlivých riadkov
+  if (parts.length === 1 && parts[0].length > maxChunkSize) {
+    parts = cleanText
+      .split(/\n/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+  }
+
+  // Ak stále máme len 1 veľký blok, delíme podľa viet
+  if (parts.length === 1 && parts[0].length > maxChunkSize) {
+    parts = cleanText
+      .split(/(?<=[.!?])\s+/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+  }
+
+  // Skladáme kúsky dohromady do chunkov s max veľkosťou
   const chunks = [];
   let currentChunk = '';
 
-  for (const paragraph of paragraphs) {
-    // Ak by pridanie odstavca prekročilo limit, uložíme aktuálny chunk
-    if (currentChunk && (currentChunk.length + paragraph.length + 1) > maxChunkSize) {
+  for (const part of parts) {
+    if (currentChunk && (currentChunk.length + part.length + 1) > maxChunkSize) {
       chunks.push(currentChunk.trim());
 
       // Overlap — vezmeme koniec aktuálneho chunku ako začiatok nového
-      // Nájdeme poslednú vetu v rámci overlap dĺžky
       const overlapText = currentChunk.slice(-overlap);
-      currentChunk = overlapText + '\n' + paragraph;
+      currentChunk = overlapText + '\n' + part;
     } else {
-      // Pridáme odstavec do aktuálneho chunku
-      currentChunk = currentChunk ? currentChunk + '\n' + paragraph : paragraph;
+      currentChunk = currentChunk ? currentChunk + '\n' + part : part;
     }
   }
 
