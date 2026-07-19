@@ -1,12 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
 import { readFileSync } from 'fs';
+import multer from 'multer';
 import { chunkText } from './chunker.js';
-import { addChunks } from './vectorStore.js';
+import { addChunks, clearStore } from './vectorStore.js';
 import { askStream } from './rag.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Multer — ukladá nahrané súbory do pamäte (nie na disk)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware
 app.use(express.json());
@@ -32,16 +36,49 @@ app.post('/api/chat', async (req, res) => {
 
   try {
     await askStream(message, (chunk) => {
-      // Každý kúsok textu pošleme ako SSE event
       res.write(`data: ${JSON.stringify({ text: chunk })}\n\n`);
     });
-    // Signál že stream skončil
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
   } catch (error) {
     console.error('Chat error:', error.message);
     res.write(`data: ${JSON.stringify({ error: 'Something went wrong' })}\n\n`);
     res.end();
+  }
+});
+
+// Upload endpoint — nahrá dokument a spracuje ho do RAG pipeline
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  try {
+    // Prečítame obsah súboru ako text (odstránime BOM ak existuje)
+    const fileText = req.file.buffer.toString('utf-8').replace(/^\uFEFF/, '');
+
+    if (!fileText.trim()) {
+      return res.status(400).json({ error: 'File is empty' });
+    }
+
+    // Vyčistíme starý vector store a nahráme nový dokument
+    clearStore();
+    const newChunks = chunkText(fileText);
+
+    if (newChunks.length === 0) {
+      return res.status(400).json({ error: 'Could not extract text from file' });
+    }
+
+    await addChunks(newChunks);
+
+    res.json({
+      success: true,
+      filename: req.file.originalname,
+      chunks: newChunks.length
+    });
+  } catch (error) {
+    console.error('Upload error:', error.message);
+    res.status(500).json({ error: 'Failed to process file' });
   }
 });
 

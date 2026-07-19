@@ -11,6 +11,11 @@
     <header>
       <h1>RAG Chatbot</h1>
       <p class="subtitle">Ask questions about the uploaded documents</p>
+      <div class="upload-area">
+        <label class="upload-btn" for="file-input">Upload Document (.txt)</label>
+        <input type="file" id="file-input" accept=".txt" hidden>
+        <span class="upload-status" id="upload-status"></span>
+      </div>
     </header>
 
     <div class="chat" id="chat">

@@ -31,7 +31,6 @@ export async function addChunks(chunks) {
   for (let i = 0; i < chunks.length; i++) {
     store.push({ text: chunks[i], vector: vectors[i] });
   }
-  console.log(`Added ${chunks.length} chunks to vector store (total: ${store.length})`);
 }
 
 /**

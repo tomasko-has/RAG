@@ -53,6 +53,34 @@ header h1 {
   margin-top: 4px;
 }
 
+.upload-area {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.upload-btn {
+  padding: 8px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload-btn:hover {
+  border-color: var(--accent);
+}
+
+.upload-status {
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
 .chat {
   flex: 1;
   overflow-y: auto;
