@@ -24,7 +24,7 @@ fileInput.addEventListener('change', async () => {
     const data = await response.json();
 
     if (data.success) {
-      uploadStatus.textContent = `"${data.filename}" loaded (${data.chunks} chunks)`;
+      uploadStatus.textContent = `${data.filename} loaded (${data.chunks} chunks)`;
       addMessage(`Document "${data.filename}" uploaded and processed. You can now ask questions about it.`, 'assistant');
     } else {
       uploadStatus.textContent = data.error || 'Upload failed';
@@ -34,7 +34,6 @@ fileInput.addEventListener('change', async () => {
     uploadStatus.textContent = 'Upload failed: ' + error.message;
   }
 
-  // Reset input aby sa dal nahrať ten istý súbor znova
   fileInput.value = '';
 });
 
@@ -44,12 +43,10 @@ form.addEventListener('submit', async (e) => {
   const message = input.value.trim();
   if (!message) return;
 
-  // Pridaj user správu do chatu
   addMessage(message, 'user');
   input.value = '';
   sendBtn.disabled = true;
 
-  // Vytvor prázdnu assistant správu (budeme do nej streamovať)
   const assistantMsg = addMessage('', 'assistant');
 
   try {
@@ -59,7 +56,6 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({ message })
     });
 
-    // Čítame SSE stream
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -70,9 +66,8 @@ form.addEventListener('submit', async (e) => {
 
       buffer += decoder.decode(value, { stream: true });
 
-      // Spracuj všetky kompletné SSE eventy v bufferi
       const lines = buffer.split('\n');
-      buffer = lines.pop(); // posledný nekompletný riadok nechaj v bufferi
+      buffer = lines.pop();
 
       for (const line of lines) {
         if (line.startsWith('data: ')) {
@@ -86,7 +81,6 @@ form.addEventListener('submit', async (e) => {
         }
       }
 
-      // Auto-scroll dolu
       chat.scrollTop = chat.scrollHeight;
     }
   } catch (error) {
@@ -101,10 +95,14 @@ function addMessage(text, role) {
   const div = document.createElement('div');
   div.className = `message ${role}`;
 
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+
   const content = document.createElement('div');
   content.className = 'message-content';
   content.textContent = text;
 
+  div.appendChild(avatar);
   div.appendChild(content);
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
