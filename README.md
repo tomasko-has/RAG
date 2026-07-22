@@ -2,6 +2,10 @@
 
 A Retrieval-Augmented Generation chatbot that answers questions based on uploaded documents. Instead of relying on pre-trained knowledge, the chatbot retrieves relevant information from your documents and generates accurate, context-grounded responses.
 
+**[Live Demo](https://rag-qubb.onrender.com)**
+
+![RAG Chatbot Screenshot](screenshot.png)
+
 ## How RAG Works
 
 1. **Document Chunking** -- The uploaded document is split into smaller, overlapping text chunks for efficient processing.
